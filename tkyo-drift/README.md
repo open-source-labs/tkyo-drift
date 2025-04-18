@@ -65,7 +65,6 @@ Just keep in mind that this tool doesn't tell you why you are drifting, only tha
   - [What Do They Tell Us?](#what-do-they-tell-us)
   - [Comparison Logic](#comparison-logic)
   - [PSI Values (Population Stability Index)](#psi-values-population-stability-index)
-- [Future Iterations](#future-iterations)
 - [Contributing](#contributing)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
@@ -587,66 +586,6 @@ The PSI interpretation follows standard thresholds:
 | > 0.25    | Major shift; model drift likely |
 
 These scores are included in the scalar metric CLI drift output and provide a statistically grounded way to monitor changes in features like entropy, token length, or word complexity — even if the semantic embeddings remain stable.
-
-# Future Iterations
-
-For this project there are a number of ways this platform could be made better, including:
-
-### Rolling Data Selection
-
-The rolling file currently uses a fixed number of records when loaded during the readFromBin method on the DriftModel class, this fixed number may not be a flexible enough method of selecting the number of records to compare for rolling drift. It would be an improvement to modify this so that it uses entries from the last N days instead.
-
-Building this would require adding a date to the binary file write method to store when a file was added, or replacing the binary file writer entirely and switching to a different file storage format. Regardless, at the time of this readme writeup, there is no date associated with stored vectors and so there is no way to have the rolling file use the last N days of records instead of a fixed count.
-
-### Picking a better K value
-
-The current implementation sets K using a heuristic: K = int(sqrt(num_vectors / 2)*10) if your training data includes at least 500,000 records. This means that there is an accuracy shift that kicks in at exactly 500,000 records. Before this point, the system will retrieve the nearest neighbor from all 500,000 points but after this point we will be searching from 500 records.
-
-While the elbow method offers a more statistically grounded way to choose K by evaluating clustering performance across several K values, it is computationally intensive.
-
-Implementing the elbow method would require running KMeans multiple times and analyzing metrics like SSE or silhouette scores. Given our real-time and batch constraints, we avoid this due to diminishing accuracy gains (often logarithmic) versus increased computational cost (often linear to exponential with larger datasets).
-
-However, since this value can be derived during the batch ingestion, when performance is not a priority, you could add it there. :)
-
-### Python vs Javascript
-
-This project was initially built as a pure javascript project to enable wider deployment, but various functions and libraries were originally built, and intended to be used in python. As a result, this project was refactored after an initial test build to include a javascript pipeline for individual embeddings and a python version for batched embeddings. For example, you cant use GPU acceleration in the javascript pipeline, but you can in the Python one.
-
-What this means is that the `tkyoDriftSetTraining.py` file and the `tkyoDrift.js` processes are functionally duplicates of each other except that the former is explicitly meant to be called once for a batch, while the later is meant to be invoked on every new input.
-
-This is fine as it is, but since many javascript libraries are just python scripts wearing a disguise, it would be ideal to rebuild this entire platform in python with a javascript NPM package to install it, and a javascript function hook to pass data into it. This would allow this system to avoid unnecessary conversion from javascript into python to execute AI embeddings, calculate K means, or generate the HNSW index.
-
-### PSI Logging
-
-At the time of writing, this project does not log PSI values to a csv file. This means that while PSI values are calculated on demand using the `printScalarCLI.js`, there are no exportable scalar metrics for external data visualization tools.
-
-Fixing this would involve adding a cronjob to compare scalar metrics on an interval, or adding a counter of some sort and triggering a scalar comparison every N (10? 100?) new inputs. If the output of this comparison is sent to a log instead of the CLI, it would be consumable by external tools.
-
-Theoretically the data is still accessible in the JSONL files, but there are many of those, and rigging them together to get a complete picture is tedious.
-
-### Cloud Based embedding services
-
-Waiting is pain, and embedding hundreds of thousands of inputs over and over again can take a long time. Not to mention that larger models take up a ton of space (1 mill inputs for 3 models for both baselines is like 6 gbs). This whole platform could be a paid service where people upload their I/Os and you keep their embeddings remotely.
-
-Not only that, but there is a vast range of data visualizations that could be made, warning and alerts, recommendations based on what flags are getting triggered, etc.
-
-This would involve creating a whole front end with user login, a backend API to receive one off calls and a file upload system to receive massive training data files. This would be a fun project in it's own right, but obviously involves cloud server costs to rapidly process embeddings. If you do decide to make a business out of this, give us a call, we would love to help.
-
-### Multi-Modality
-
-This project is only developed to be able to ingest text data, but there are many AI workflows out there. A future iteration of this project could include text2img, img2img, text2video, img2video, etc.
-
-Most of the ground work for this is already done, but new embedding models specifically designed for those types of workflows would need to be incorporated, along with file type handling which is missing in the main workflow. (As in, if you pass anything other than text into the main or batch embedding function, they break.)
-
-### More Math
-
-We are currently calculating a number of metrics from both individual vectors as well as populations across the training and rolling data sets. There is room for improvement, however, in that there are additional drift measures such as KL divergence and Earth Movers distance that would be useful to calculate in this workflow.
-
-It is our opinion that either of these could be added to the tkyoDrift analysis with minimal effort, as the `tkyoDrift` main logic `tkyoDriftSetTraining.py` batch embedding logic both capture scalar metrics for population comparisons already.
-
-### Testing Battery
-
-Its worth building. We should have. We didn't.
 
 ## Contributing
 

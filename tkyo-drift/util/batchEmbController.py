@@ -20,8 +20,6 @@ def tkyoDriftSetTraining(data_set_Path, io_type, io_type_name):
 
     # Define the models
     MODELS = {
-        # 't5': 'Xenova/sentence-t5-large',
-        # 'bert': 'Xenova/sentence_bert', 
         'mini': 'sentence-transformers/all-MiniLM-L12-v2',
         'e5': 'intfloat/e5-base-v2',
     }
