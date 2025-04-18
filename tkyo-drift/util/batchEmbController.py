@@ -22,8 +22,8 @@ def tkyoDriftSetTraining(data_set_Path, io_type, io_type_name):
     MODELS = {
         # 't5': 'Xenova/sentence-t5-large',
         # 'bert': 'Xenova/sentence_bert', 
-        'mini': 'all-MiniLM-L12-v2',
-        'e5': 'e5-base-v2', 
+        'mini': 'sentence-transformers/all-MiniLM-L12-v2',
+        'e5': 'intfloat/e5-base-v2',
     }
 
 

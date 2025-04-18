@@ -115,9 +115,13 @@ tkyoDrift(userSubmission, 'input')
 
 5. Enjoy the benefits of having drift detection:
 
+```bash
+npx tkyo cos
+npx tkyo scalar
+🏎️☁️☁️☁️ ← THAT GUY IS DRIFTING
 ```
-🏎️☁️☁️☁️ <- THAT GUY IS DRIFTING
-```
+
+This library will create a tkyoData folder at the project root! Don't forget to add it to your `.gitIgnore` as it may contain large files depending on your throughput. All logs, scalars, and binary files tkyoDrift needs to operate will be placed there.
 
 # How do you use this thing?
 

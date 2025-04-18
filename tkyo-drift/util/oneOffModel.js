@@ -294,7 +294,7 @@ export class DriftModel {
       );
     }
     // Ensures we are running pythonHNSW.py correctly
-    const scriptPath = path.join(__dirname, 'pythonHNSW.py');
+    const scriptPath = path.join(__dirname, 'sharedHNSW.py');
 
     try {
       return new Promise((resolve, reject) => {

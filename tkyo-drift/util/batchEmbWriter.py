@@ -150,7 +150,7 @@ def trainingEmb(model_type, model_name, data_path, io_type, io_type_name):
         return chunks
 
     # Embed Data
-    print(f"Embedding {io_type}s using {model_name} for {model_type} knowledge...")
+    print(f"Embedding {io_type}s using {model_name}")
     # Initialize an empty list to store all input embeddings
     embeddings = []
     # Set the number of examples to process at once (smaller = less memory, larger = faster)
