@@ -42,9 +42,9 @@
 @@@@@@@@@@@@@@@@@%+:--::=****=:..::-. ......       ...:::::..........................                                                                                                                           .        
 @%%%####******+++++++++=============------:::::.............                                                   ...............................::::::::::::::::::::::------=====+++++++*******#######%%%%%%@@@@@@@        
 @@@@@@@@@@@@@@@@@@%%%##############%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
-import tkyoDriftSetTrainingHook from './util/tkyoDriftSetTrainingHook.js';
-import printScalarCLI from './util/printScalarCLI.js';
-import printLogCLI from './util/printLogCLI.js';
+import tkyoDriftSetTrainingHook from './util/batchPythonHook.js';
+import printScalarCLI from './util/logPrintScalarCLI.js';
+import printLogCLI from './util/logPrintCosCLI.js';
 import tkyoDrift from './util/oneOffEmb.js';
 import chalk from 'chalk';
 import path from 'path';

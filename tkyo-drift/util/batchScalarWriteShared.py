@@ -4,7 +4,7 @@ import json
 import numpy as np
 import time
 from datetime import datetime
-from pythonTrainingEmb import resolve_io_column
+from batchEmbWriter import resolve_io_column
 
 # * Writes shared scalar metrics (like character length, entropy, etc.) for training data
 # * One file is created per metric (e.g., ioTypeName.characterLength.training.scalar.jsonl)

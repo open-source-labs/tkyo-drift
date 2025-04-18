@@ -1,10 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 import { v4 } from 'uuid';
-import { DriftModel } from './DriftModel.js';
-import makeLogEntry from './makeLogEntry.js';
-import makeErrorLogEntry from './makeErrorLogEntry.js';
-import captureSharedScalarMetrics from './captureSharedScalarMetrics.js';
+import { DriftModel } from './oneOffModel.js';
+import makeLogEntry from './logMakeEntry.js';
+import makeErrorLogEntry from './logMakeError.js';
+import captureSharedScalarMetrics from './scalarCaptureShared.js';
 
 // * Global Variables for the utilities
 //  Embedding Models

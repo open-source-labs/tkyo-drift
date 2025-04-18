@@ -2,8 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 import Table from 'cli-table3';
-import { compareScalarDistributions } from './compareScalarDistributions.js';
-import { loadScalarMetrics } from './loadScalarMetrics.js';
+import { compareScalarDistributions } from './scalarCompare.js';
+import { loadScalarMetrics } from './scalarLoadMetrics.js';
 import { OUTPUT_DIR } from './oneOffEmb.js';
 
 export default async function printScalarCLI() {

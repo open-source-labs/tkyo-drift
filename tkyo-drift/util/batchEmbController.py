@@ -2,8 +2,8 @@
 import sys
 sys.dont_write_bytecode = True
 # Import helper function to load and embed the data
-import pythonTrainingEmb
-from writeSharedScalars import write_shared_scalar_metrics
+import batchEmbWriter
+from batchScalarWriteShared import write_shared_scalar_metrics
 
 
 # Allows the use of time functions
@@ -22,8 +22,8 @@ def tkyoDriftSetTraining(data_set_Path, io_type, io_type_name):
     MODELS = {
         # 't5': 'Xenova/sentence-t5-large',
         # 'bert': 'Xenova/sentence_bert', 
-        'mini': 'Xenova/all-MiniLM-L12-v2',
-        'e5': 'Xenova/e5-base-v2', 
+        'mini': 'all-MiniLM-L12-v2',
+        'e5': 'e5-base-v2', 
     }
 
 
@@ -32,7 +32,7 @@ def tkyoDriftSetTraining(data_set_Path, io_type, io_type_name):
 
     # Iterate through models dictionary
     for model_type, model_name in MODELS.items():
-        pythonTrainingEmb.trainingEmb(
+        batchEmbWriter.trainingEmb(
             model_type=model_type,
             model_name=model_name,
             data_path=data_set_Path,

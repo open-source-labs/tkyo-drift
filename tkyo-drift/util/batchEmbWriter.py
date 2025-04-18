@@ -3,7 +3,7 @@ import sys
 sys.dont_write_bytecode = True
 
 # Import helper function to create kmeans of data
-import pythonKMeans
+import batchMakeKMeans
 
 # This is good for vectors/matrices
 import numpy as np
@@ -250,7 +250,7 @@ def trainingEmb(model_type, model_name, data_path, io_type, io_type_name):
             embeddings.astype(np.float32).tofile(f)
     else:
         print(f"You have >=  100000 {io_type} embeddings: Performing K Means analysis to filter embeddings.")
-        kMeansEmbedding = pythonKMeans.kMeansClustering(embeddings)
+        kMeansEmbedding = batchMakeKMeans.kMeansClustering(embeddings)
 
         # Assign the number of vectors for the training data
         num_vectors = kMeansEmbedding.shape[0]
