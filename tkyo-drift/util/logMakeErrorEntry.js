@@ -6,7 +6,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { OUTPUT_DIR } from './oneOffEmb.js';
+import { config } from '../config.js';
 
 /**
  * Creates or appends an error log entry to the error log CSV file.
@@ -14,8 +14,8 @@ import { OUTPUT_DIR } from './oneOffEmb.js';
  * @param {Error} error - The error object to be logged
  */
 export default function makeErrorLogEntry(error) {
-  // Build path to error log
-  const logPath = path.join(OUTPUT_DIR, 'logs', 'ERR_log.csv');
+  // Construct the path to the error log file
+  const logPath = path.join(config.outputDir, 'logs', 'ERR_log.csv');
 
   // Create a timestamp for when the error occurred
   const timestamp = new Date().toISOString();

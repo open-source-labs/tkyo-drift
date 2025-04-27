@@ -4,10 +4,10 @@
  * of training data and embeddings.
  */
 
-import { spawn } from 'child_process';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import fs from 'fs';
+import { spawn } from 'child_process';
 
 // Full path to tkyoDriftSetTrainingHook.js
 const __filename = fileURLToPath(import.meta.url);

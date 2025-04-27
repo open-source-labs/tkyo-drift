@@ -8,9 +8,9 @@ import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 import Table from 'cli-table3';
-import { compareScalarDistributions } from './scalarCompare.js';
+import { config } from '../config.js';
 import { loadScalarMetrics } from './scalarLoadMetrics.js';
-import { OUTPUT_DIR } from './oneOffEmb.js';
+import { compareScalarDistributions } from './scalarCompare.js';
 
 /**
  * Prints a formatted table of scalar metric drift analysis to the console.
@@ -21,8 +21,8 @@ import { OUTPUT_DIR } from './oneOffEmb.js';
  */
 
 export default async function printScalarCLI() {
-  // Define the path to where scalar .jsonl files are stored
-  const SCALAR_DIR = path.join(OUTPUT_DIR, 'scalars');
+  // Construct the path to the scalar metrics directory
+  const SCALAR_DIR = path.join(config.outputDir, 'scalars');
 
   // Define warning boolean to console log a warning if we are in hybrid mode
   let warn = false;

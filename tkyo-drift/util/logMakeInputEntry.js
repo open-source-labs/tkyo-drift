@@ -7,7 +7,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { OUTPUT_DIR } from './oneOffEmb.js';
+import { config } from '../config.js';
 
 /**
  * Escapes a string for CSV format by:
@@ -31,21 +31,13 @@ function escapeCSV(str) {
  * @param {string} text - The actual text content being analyzed
  */
 export default function logMakeInputEntry(id, text) {
-  // Construct the path to the text log file in the logs directory
-  const logPath = path.join(OUTPUT_DIR, 'logs', 'text_log.csv');
-  
-  // Generate an ISO timestamp for when this entry is being made
+  const logPath = path.join(config.outputDir, 'logs', 'text_log.csv');
   const timestamp = new Date().toISOString();
-  
-  // Create the CSV row with ID, timestamp, and escaped text content
-  // ID and timestamp don't need escaping as they won't contain special characters
   const row = [id, timestamp, escapeCSV(text)];
   const csvLine = row.join(',') + '\n';
 
-  // Check if the log file already exists
   const fileExists = fs.existsSync(logPath);
 
-  // Write to the log file
   try {
     if (!fileExists) {
       // If the file doesn't exist, create it with headers

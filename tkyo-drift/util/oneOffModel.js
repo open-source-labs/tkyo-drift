@@ -9,9 +9,10 @@ import path from 'path';
 import { error } from 'console';
 import { fileURLToPath } from 'url';
 import fsPromises from 'fs/promises';
+import { config } from '../config.js';
 import { spawn } from 'child_process';
+import { MODEL_CACHE } from './oneOffEmb.js';
 import { pipeline } from '@xenova/transformers';
-import { OUTPUT_DIR, MODEL_CACHE } from './oneOffEmb.js';
 
 /**
  * Class representing a drift analysis model.
@@ -60,14 +61,14 @@ export class DriftModel {
       const baseName = `${this.modelType}.${this.ioType}.${this.baselineType}`;
 
       // Assemble the embedding file path (.bin file)
-      const vectorPath = path.join(OUTPUT_DIR, 'vectors', `${baseName}.bin`);
+      const vectorPath = path.join(config.outputDir, 'vectors', `${baseName}.bin`);
       const vectorKmeansPath = path.join(
-        OUTPUT_DIR,
+        config.outputDir,
         'vectors',
         `${baseName}.kmeans.bin`
       );
       const fallbackPath = path.join(
-        OUTPUT_DIR,
+        config.outputDir,
         'vectors',
         `${this.modelType}.${this.ioType}.rolling.bin`
       );
@@ -82,7 +83,7 @@ export class DriftModel {
 
       // Scalar metric path (.scalar.jsonl)
       this.scalarFilePath = path.join(
-        OUTPUT_DIR,
+        config.outputDir,
         'scalars',
         `${baseName}.scalar.jsonl`
       );
@@ -605,7 +606,7 @@ export class DriftModel {
           // Construct the file path using: ioType.metric.modelType.baselineType.scalar.jsonl
           // Example: input.norm.semantic.rolling.scalar.jsonl
           const filePath = path.join(
-            OUTPUT_DIR,
+            config.outputDir,
             'scalars',
             `${this.ioType}.${metric}.${this.modelType}.rolling.scalar.jsonl`
           );

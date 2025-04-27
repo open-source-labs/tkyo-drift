@@ -6,7 +6,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { OUTPUT_DIR } from './oneOffEmb.js';
+import { config } from '../config.js';
 
 /**
  * Creates or appends a log entry for drift metrics to the appropriate CSV file.
@@ -19,9 +19,9 @@ export default function makeLogEntry(id, mathObject, type) {
   let logPath = '';
   // Construct the destination to the log in the data folder
   if (type === 'COS') {
-    logPath = path.join(OUTPUT_DIR, 'logs', 'COS_log.csv');
-  } else {
-    logPath = path.join(OUTPUT_DIR, 'logs', 'EUC_log.csv');
+    logPath = path.join(config.outputDir, 'logs', 'COS_log.csv');
+  } else if (type === 'EUC') {
+    logPath = path.join(config.outputDir, 'logs', 'EUC_log.csv');
   }
 
   // Create a timestamp

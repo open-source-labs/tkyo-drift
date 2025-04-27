@@ -8,7 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 import Table from 'cli-table3';
-import { MODELS, OUTPUT_DIR } from './oneOffEmb.js';
+import { config } from '../config.js';
 
 /**
  * Prints a formatted table of cosine similarity drift metrics to the console.
@@ -20,7 +20,7 @@ import { MODELS, OUTPUT_DIR } from './oneOffEmb.js';
  */
 export default async function printLogCLI(arg) {
   // Constants & CLI Args
-  const logPath = path.join(OUTPUT_DIR, 'logs', 'COS_log.csv');
+  const logPath = path.join(config.outputDir, 'logs', 'COS_log.csv');
   const days = isNaN(parseInt(arg)) ? 30 : parseInt(arg);
   const driftThreshold = 0.8;
   const startTime = Date.now() - days * 86400000; // milliseconds in a day
@@ -98,7 +98,7 @@ export default async function printLogCLI(arg) {
 
   // Build the table rows by model type, io type, and baseline type
   for (const ioType of ioTypes) {
-    for (const [modelType] of Object.entries(MODELS)) {
+    for (const [modelType] of Object.entries(config.models)) {
       for (const baselineType of baselineTypes) {
         const columnHeader = `${modelType.toUpperCase()} ${baselineType.toUpperCase()} COS`;
         const colIndex = headers.indexOf(columnHeader);

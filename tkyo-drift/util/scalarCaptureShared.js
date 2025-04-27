@@ -4,10 +4,10 @@
  * and uppercase ratio, which are stored in JSONL files for drift analysis.
  */
 
-import fsPromises from 'fs/promises';
 import fs from 'fs';
 import path from 'path';
-import { OUTPUT_DIR } from './oneOffEmb.js';
+import fsPromises from 'fs/promises';
+import { config } from '../config.js';
 
 /**
  * Captures and stores shared scalar metrics for a given text input.
@@ -28,7 +28,7 @@ export default async function captureSharedScalarMetrics(text, ioType) {
     Object.entries(metricSet).map(([metric, value]) => {
       // Construct the file path
       const filePath = path.join(
-        OUTPUT_DIR,
+        config.outputDir,
         'scalars',
         `${ioType}.${metric}.rolling.scalar.jsonl`
       );

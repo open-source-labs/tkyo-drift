@@ -11,7 +11,7 @@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@+:#@@@@@@=.-=+#++:..:=+*##*=..*%%@@@@%#=:@@@@@@@@@@%**@@@@@@@@@@@%#+=-::..::-==+**######%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%#:.-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@        
 @@@@@@@@@@@@@@@@@@@@@@@@@@@+%@@@@@@@@@@:.-:=#@@@@@@@@@@@@@%%=%@@@@@@%*.:-*%%%%*-*+=-:.:-=+*#%%######%%%%###***+++=====--------======+++++++****####%%%%@@%%#=--:+@@@@@@@@@@@@@@@@@@@@@@@=-@@@@@@@@@@@@@@@@@@@@@@@        
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@+*@@@@@@@@@@@@@@@@@@@@@%%%@@@@@@%-%%%+..=#%%#####*+=--=+**##%%%%%#*++=--::.........................................:%@%.....:...:::-=+*#%@@@@@@@@@**:@@@@@@@@@@@@@@@@@@@@@@@        
-@@@@@@@@@#%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%@@@@@%#%#:-%####%%#**+=-:.                                                                 -%#. :.....::::::::::::::::::-*.@@@@@@@@@@@@@@@@@@@@@@@        
+@@@@@#%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%@@@@@%#%#:-%####%%#**+=-:.                                                                 -%#. :.....::::::::::::::::::-*.@@@@@@@@@@@@@@@@@@@@@@@        
 @@@@@@@@@@@.#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%@@%@@@%%=:%%*..                                                                              .%@:..:.....::::::::::::::::=-:@@@@@@@@@@@@@@@@@@@@@@@        
 @@@@@@@@@@@@=-@@*@@@@@@@@@@@@@@@@@@@@@%*==-:.-#@@@@@@@@@@@@@@@@@@@@@%:#%+..            .************=:*****:.=****+-+****===*####=--+#%@@@@%#*::::...........%%:..-.   :@@@@@@@@@@@@@@@==-@@@@@@@@@@@@@@@@@@@@@@@        
 @@@@@@@@@@@@@=--@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%+.*@@@@@@@@@@@@@@@@@@=-%%..       ......:@@@@@@@@@@@@%.%@@@@=+@@@@%:.*@@@@#:.#@@@@+.%@@@@@@@@@@@@:....     --.=.#@-..::    +@@@@@@@@@@@@@+=+@@@@@@@@@@@@@@@@@@@@@@@        
@@ -68,6 +68,7 @@ const [command, ...rest] = process.argv.slice(2);
  * - cos: Show cosine similarity drift logs
  * - scalar: Show scalar metric drift comparison
  * - train: Process training data and update baselines
+ * - inputs: Toggle text input logging
  * 
  * @example
  * Show cosine similarity drift for last 30 days
@@ -78,61 +79,64 @@ const [command, ...rest] = process.argv.slice(2);
  * 
  * Process training data
  * tkyo train ./data input input
+ * 
+ * Toggle text input logging
+ * tkyo inputs
  */
 
-// Only run if the command is a "tkyo" command
-// if (process.argv[1] === new URL(import.meta.url).pathname) { // ! Alternative, ESM Based
-if (process.argv[1].endsWith('tkyo')) {
-  // switch case to determine which file to invoke
-  switch (command) {
-    // ? tkyo cos <number of days>
-    case 'cos': {
-      const dayArgument = rest[0] || '30';
-      process.argv = ['node', 'printLogCLI.js', dayArgument];
-      await printLogCLI(dayArgument);
-      break;
-    }
+async function main() {
+  // Only run if the command is a "tkyo" command
+  if (process.argv[1].endsWith('tkyo')) {
+    // switch case to determine which file to invoke
+    switch (command) {
+      // ? tkyo cos <number of days>
+      case 'cos': {
+        const dayArgument = rest[0] || '30';
+        process.argv = ['node', 'printLogCLI.js', dayArgument];
+        await printLogCLI(dayArgument);
+        break;
+      }
 
-    // ? tkyo scalar
-    case 'scalar': {
-      await printScalarCLI();
-      break;
-    }
+      // ? tkyo scalar
+      case 'scalar': {
+        await printScalarCLI();
+        break;
+      }
 
-    // ? tkyo train <path to data> <column name> <ioType>
-    case 'train': {
-      const [pathToData, columnName, ioType] = rest;
+      // ? tkyo train <path to data> <column name> <ioType>
+      case 'train': {
+        const [pathToData, columnName, ioType] = rest;
 
-      // Error handle when
-      if (!pathToData || !columnName || !ioType) {
-        console.error(
-          chalk.blueBright(
-            'Usage: tkyo train <path to data> <column name> <ioType>'
-          )
+        // Error handle when the user doesn't provide the correct arguments
+        if (!pathToData || !columnName || !ioType) {
+          console.error(
+            chalk.blueBright(
+              'Usage: tkyo train <path to data> <column name> <ioType>'
+            )
+          );
+          process.exit(1);
+        }
+
+        // If someone calls the train command, we normalize the path.
+        const normalizedPath = path.resolve(
+          process.cwd(),
+          pathToData.replace(/\\/g, '/')
         );
-        process.exit(1);
+
+        // Error handle when the path does not exist.
+        if (!fs.existsSync(normalizedPath)) {
+          console.error(chalk.red(`The dataSetPath provided does not exist.`));
+        }
+
+        await tkyoDriftSetTrainingHook(normalizedPath, columnName, ioType);
+        console.log(chalk.green("Job's done."));
+        break;
       }
 
-      // If someone calls the train command, we normalize the path.
-      const normalizedPath = path.resolve(
-        process.cwd(),
-        pathToData.replace(/\\/g, '/')
-      );
-
-      // Error handle when the path does not exist.
-      if (!fs.existsSync(normalizedPath)) {
-        console.error(chalk.red(`The dataSetPath provided does not exist.`));
-      }
-
-      await tkyoDriftSetTrainingHook(normalizedPath, columnName, ioType);
-      console.log(chalk.green("Job's done."));
-      break;
-    }
-
-    // ? help commands
-    default:
-      console.log(
-        chalk.gray(`
+      // ? help commands
+      default:
+        console.log(
+          chalk.gray(`
 ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓   ↗↑↑      ↗↓↓↓↗     ↓↓↓          ↓↓↓    ↓↓↓↓↓↓↓↓↓↓↓↓↖
        ↗↑↑         ↗↑↑     ↗↑↑↑       ↗↑↑         ↗↑↑   ↗↑↑↑         ↖↑↑
       ↗↑↑         ↗↑↑    ↗↑↑↑        ↗↑↑         ↗↑↑   ↗↑↑           ↖↑↑
@@ -144,22 +148,30 @@ if (process.argv[1].endsWith('tkyo')) {
 
 Usage:
   ${chalk.yellowBright('tkyo')} ${chalk.white('cos')} ${chalk.blueBright(
-          '<number of days>'
-        )}                         Show COS Drift logs for last N days
+            '<number of days>'
+          )}                         Show COS Drift logs for last N days
   ${chalk.yellowBright('tkyo')} ${chalk.white(
-          'scalar'
-        )}                                       Show scalar drift comparison
+            'scalar'
+          )}                                       Show scalar drift comparison
   ${chalk.yellowBright('tkyo')} ${chalk.white('train')} ${chalk.blueBright(
-          '<path to data> <column name> <ioType>'
-        )}  Embed dataset and update training baseline
+            '<path to data> <column name> <ioType>'
+          )}  Embed dataset and update training baseline
+
+${chalk.cyanBright('Environment variables:')}
+  ${chalk.white('TEXT_LOGGING')}   Set to 'false' to disable text input logging (default: true)
+  ${chalk.white('OUTPUT_DIR')}     Set the output directory for all drift data (default: ./tkyoData)
+  ${chalk.white('You can also update the embedding models in the config.js file')}
 
 Readme docs are in the node package or at ${chalk.blueBright(
-          'https://github.com/oslabs-beta/tkyo-drift'
-        )}
-      `)
-      );
+            'https://github.com/oslabs-beta/tkyo-drift'
+          )}
+        `)
+        );
+    }
   }
 }
+
+main();
 
 /**
  * Export the main drift analysis function for programmatic use.
