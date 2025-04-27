@@ -106,14 +106,14 @@ if (process.argv[1].endsWith('tkyo')) {
     default:
       console.log(
         chalk.gray(`
-↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓    ↑↑↑     ↗↓↓↓↗     ↓↓↓         ↓↓↓    ↓↓↓↓↓↓↓↓↓↓↓↓↖
-       ↑↑↑          ↑↑↑    ↗↑↑↑       ↑↑↑         ↑↑↑   ↑↑↑↑         ↖↑↑
-      ↑↑↑          ↑↑↑   ↗↑↑↑        ↑↑↑         ↑↑↑   ↑↑↑           ↖↑↑
-     ↑↑↑          ↑↑↑↑↑↑↑↘          ↑↑↑        ↑↑↑↑   ↑↑↑            ↖↑↑
-    ↖↑↑         →↑↑    ↑↑↑↘         ↑↑↑↑↑↑↑↑↑↑↑↑↑    ←↑↑            ↑↑↑↗
-    ↑↑↑         ↑↑↑     ↑↑↑↘             ↑↑↑         ↑↑↑           ↗↑↑↓
-   ↑↑↑         ↑↑↑       ↑↑↑↘           ↑↑↑          ↑↑↑↑        ↗↑↑↑
-  ↑↑↑         ↑↑↑         ↑↑↑↘         ↑↑↑            ↑↑↑↑↑↑↑↑↑↑↑↑↑↗
+↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓   ↗↑↑      ↗↓↓↓↗     ↓↓↓          ↓↓↓    ↓↓↓↓↓↓↓↓↓↓↓↓↖
+       ↗↑↑         ↗↑↑     ↗↑↑↑       ↗↑↑         ↗↑↑   ↗↑↑↑         ↖↑↑
+      ↗↑↑         ↗↑↑    ↗↑↑↑        ↗↑↑         ↗↑↑   ↗↑↑           ↖↑↑
+     ↗↑↑          ↑↑↑↑↑↑↑↘          ↗↑↑        ↗↑↑↑   ↗↑↑            ↖↑↑
+    ↖↑↑         →↑↑    ↑↑↑↘         ↑↑↑↑↑↑↑↑↑↑↑↑↑     ←↑↑            ↗↑↑↓
+   ↗↑↑         ↗↑↑     ↑↑↑↘             ↑↑↑          ↖↑↑           ↗↑↑↓
+  ↗↑↑         ↗↑↑       ↑↑↑↘           ↑↑↑           ↖↑↑↑        ↗↑↑↗
+ ↗↑↑         ↗↑↑         ↑↑↑↘         ↑↑↑             ↖↑↑↑↑↑↑↑↑↑↑↑↑↗
 
 Usage:
   ${chalk.yellowBright('tkyo')} ${chalk.white('cos')} ${chalk.blueBright(
@@ -126,7 +126,7 @@ Usage:
           '<path to data> <column name> <ioType>'
         )}  Embed dataset and update training baseline
 
-Readme docs in the node package or at ${chalk.blueBright(
+Readme docs are in the node package or at ${chalk.blueBright(
           'https://github.com/oslabs-beta/tkyo-drift'
         )}
       `)
