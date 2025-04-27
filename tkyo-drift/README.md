@@ -136,6 +136,22 @@ You can interact with this library in a couple ways;
 
 There is also a small training file downloader script in the util folder called downloadTrainingData.py that you can run to grab the training data from hugging face if you happen to be using a model for your workflow from there.
 
+## Configuration via Environment Variables
+
+TKYO Drift supports configuration via environment variables for deployment flexibility. You can set the following variables:
+
+- `TEXT_LOGGING`: Set to `false` to disable logging of input text. Default is `true`.
+- `OUTPUT_DIR`: Set the output directory for all drift data. Default is `./tkyoData`.
+
+Example usage (in your shell or `.env` file):
+
+```bash
+export TEXT_LOGGING=false
+export OUTPUT_DIR=/custom/path/for/tkyoData
+```
+
+If not set, the defaults in `util/config.js` will be used.
+
 ## One-off Ingestion
 
 Usage: Add `tkyoDrift.js(text, ioType)` in your file, along with an import statement.
@@ -308,7 +324,7 @@ Again, the second argument is the key for the object you would like to embed and
 
 ## Logging
 
-Results are stored in two CSV files (`COS_log.csv` & `EUC_log.csv`) with dynamic headers. Each one-off run appends one row to each file. Keep in mind that training data is not added to the log, as the assumption is that your training baseline is what we compare against to measure drift.
+Results are stored in three CSV files (`COS_log.csv`, `EUC_log.csv` & `text_log.csv`) with dynamic headers. Each one-off run appends one row to each file. Keep in mind that training data is not added to the log, as the assumption is that your training baseline is what we compare against to measure drift.
 
 ### Format
 
@@ -322,6 +338,12 @@ For the euclidean distance log:
 
 ```
 ID, TIMESTAMP, I/O TYPE, SEMANTIC ROLLING EUC, SEMANTIC TRAINING EUC, CONCEPT ROLLING EUC...
+```
+
+For the text input log:
+
+```
+ID, TEXT
 ```
 
 - Cosine similarities and euclidean distances are recorded per model and baseline type.
