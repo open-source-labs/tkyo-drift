@@ -1,3 +1,9 @@
+/**
+ * Utility function to print scalar metric drift analysis in a formatted CLI table.
+ * This function reads scalar metric files, compares training and rolling distributions,
+ * and displays the results in a color-coded table showing drift metrics.
+ */
+
 import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
@@ -5,6 +11,14 @@ import Table from 'cli-table3';
 import { compareScalarDistributions } from './scalarCompare.js';
 import { loadScalarMetrics } from './scalarLoadMetrics.js';
 import { OUTPUT_DIR } from './oneOffEmb.js';
+
+/**
+ * Prints a formatted table of scalar metric drift analysis to the console.
+ * The table shows statistical comparisons between training and rolling data,
+ * including means, standard deviations, and Population Stability Index (PSI).
+ * 
+ * @returns {Promise<void>}
+ */
 
 export default async function printScalarCLI() {
   // Define the path to where scalar .jsonl files are stored
@@ -155,14 +169,27 @@ export default async function printScalarCLI() {
     }
   }
 
-  // Helper to color code regular values
+  /**
+   * Formats a numeric value with 2 decimal places.
+   * 
+   * @param {number} val - The value to format
+   * @returns {string} - The formatted value in white
+   */
+
   function format(val) {
     if (typeof val !== 'number') return chalk.gray('n/a');
     const formatted = val.toFixed(2);
     return chalk.white(formatted);
   }
 
-  // Helper to color code delta values by severity
+  /**
+   * Formats a delta value with color coding based on its z-score.
+   * 
+   * @param {number} val - The delta value to format
+   * @param {number} std - The standard deviation to use for z-score calculation
+   * @returns {string} - The formatted value in green/yellow/red based on severity
+   */
+
   function formatDelta(val, std) {
     if (typeof val !== 'number') return chalk.gray('n/a');
     const formatted = val.toFixed(2);
@@ -174,7 +201,13 @@ export default async function printScalarCLI() {
     return chalk.red(formatted); // Drifted
   }
 
-  // Helper to color code PSI values by severity
+  /**
+   * Formats a PSI value with color coding based on drift severity.
+   * 
+   * @param {number} val - The PSI value to format
+   * @returns {string} - The formatted value in green/yellow/red based on severity
+   */
+
   function formatPSI(val) {
     if (typeof val !== 'number') return chalk.gray('n/a');
     const formatted = val.toFixed(3);

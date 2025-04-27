@@ -1,9 +1,24 @@
+/**
+ * Utility functions for capturing and computing shared scalar metrics for text analysis.
+ * These metrics include character length, entropy, word length, punctuation density,
+ * and uppercase ratio, which are stored in JSONL files for drift analysis.
+ */
+
 import fsPromises from 'fs/promises';
 import fs from 'fs';
 import path from 'path';
 import { OUTPUT_DIR } from './oneOffEmb.js';
 
-// Calculates the shared scalar values for a given input/output pair
+/**
+ * Captures and stores shared scalar metrics for a given text input.
+ * The metrics are written to JSONL files in the scalars directory,
+ * with separate files for each metric type.
+ * 
+ * @param {string} text - The text to analyze
+ * @param {string} ioType - The type of input/output (e.g., 'input', 'output')
+ * @returns {Promise<void>}
+ */
+
 export default async function captureSharedScalarMetrics(text, ioType) {
   const timestamp = new Date().toISOString();
 
@@ -31,7 +46,18 @@ export default async function captureSharedScalarMetrics(text, ioType) {
   );
 }
 
-// Internal helper to calculate scalar metrics for a given string
+/**
+ * Computes various scalar metrics for a given text string.
+ * 
+ * @param {string} text - The text to analyze
+ * @returns {Object} An object containing the following metrics:
+ *   - characterLength: Total number of characters
+ *   - characterEntropy: Shannon entropy of character distribution
+ *   - avgWordLength: Average length of words
+ *   - punctuationDensity: Ratio of punctuation characters
+ *   - uppercaseRatio: Ratio of uppercase letters
+ */
+
 function computeMetrics(text) {
   const metrics = {};
 

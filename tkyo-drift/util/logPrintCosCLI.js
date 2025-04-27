@@ -1,9 +1,23 @@
+/**
+ * Utility function to print cosine similarity drift metrics in a formatted CLI table.
+ * This function reads the cosine similarity log file, processes the data, and displays
+ * it in a color-coded table showing drift metrics over a specified time period.
+ */
+
 import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import { MODELS, OUTPUT_DIR } from './oneOffEmb.js';
 
+/**
+ * Prints a formatted table of cosine similarity drift metrics to the console.
+ * The table shows average similarity scores and violation counts for each model,
+ * I/O type, and baseline combination over the specified time period.
+ * 
+ * @param {string|number} arg - Number of days to look back for drift analysis (defaults to 30 if invalid)
+ * @throws {Error} If the log file doesn't exist or can't be parsed
+ */
 export default async function printLogCLI(arg) {
   // Constants & CLI Args
   const logPath = path.join(OUTPUT_DIR, 'logs', 'COS_log.csv');
@@ -16,7 +30,7 @@ export default async function printLogCLI(arg) {
     throw new Error(`No log file not found at: ${logPath}`);
   }
 
-  // Declare header and row variables so they’re accessible later
+  // Declare header and row variables so they're accessible later
   let headers, rows;
 
   try {

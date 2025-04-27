@@ -1,4 +1,12 @@
 #!/usr/bin/env node
+
+/**
+ * Main entry point for the TKYO Drift CLI tool.
+ * This module provides the command-line interface for drift analysis,
+ * including cosine similarity analysis, scalar metric comparison,
+ * and training data processing.
+ */
+
 /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*::::-%@@#:..-:..+@@@@@@@@@%#++==+*%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%##########********#######%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@        
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@+:#@@@@@@=.-=+#++:..:=+*##*=..*%%@@@@%#=:@@@@@@@@@@%**@@@@@@@@@@@%#+=-::..::-==+**######%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%#:.-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@        
 @@@@@@@@@@@@@@@@@@@@@@@@@@@+%@@@@@@@@@@:.-:=#@@@@@@@@@@@@@%%=%@@@@@@%*.:-*%%%%*-*+=-:.:-=+*#%%######%%%%###***+++=====--------======+++++++****####%%%%@@%%#=--:+@@@@@@@@@@@@@@@@@@@@@@@=-@@@@@@@@@@@@@@@@@@@@@@@        
@@ -42,6 +50,7 @@
 @@@@@@@@@@@@@@@@@%+:--::=****=:..::-. ......       ...:::::..........................                                                                                                                           .        
 @%%%####******+++++++++=============------:::::.............                                                   ...............................::::::::::::::::::::::------=====+++++++*******#######%%%%%%@@@@@@@        
 @@@@@@@@@@@@@@@@@@%%%##############%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
+
 import tkyoDriftSetTrainingHook from './util/batchPythonHook.js';
 import printScalarCLI from './util/logPrintScalarCLI.js';
 import printLogCLI from './util/logPrintCosCLI.js';
@@ -52,6 +61,24 @@ import fs from 'fs';
 
 // Get the commands from the CLI (the first 2 are not commands)
 const [command, ...rest] = process.argv.slice(2);
+
+/**
+ * Main CLI handler for TKYO Drift commands.
+ * Processes the following commands:
+ * - cos: Show cosine similarity drift logs
+ * - scalar: Show scalar metric drift comparison
+ * - train: Process training data and update baselines
+ * 
+ * @example
+ * Show cosine similarity drift for last 30 days
+ * tkyo cos 30
+ * 
+ * Show scalar metric drift comparison
+ * tkyo scalar
+ * 
+ * Process training data
+ * tkyo train ./data input input
+ */
 
 // Only run if the command is a "tkyo" command
 // if (process.argv[1] === new URL(import.meta.url).pathname) { // ! Alternative, ESM Based
@@ -133,5 +160,15 @@ Readme docs are in the node package or at ${chalk.blueBright(
       );
   }
 }
+
+/**
+ * Export the main drift analysis function for programmatic use.
+ * This allows the drift analysis functionality to be used as a library
+ * in addition to the CLI interface.
+ * 
+ * @example
+ * import tkyoDrift from 'tkyodrift';
+ * await tkyoDrift("Sample text", "input");
+ */
 
 export default tkyoDrift;

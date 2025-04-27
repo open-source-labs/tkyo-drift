@@ -24,7 +24,7 @@ In production, even minor changes to prompts, model weights, or input phrasing c
 
 And it’s not just the model: user language evolves too. New slang, trending phrases, or tone shifts may emerge that your model wasn't trained on and without observability, you'll miss them.
 
-TKYO Drift embeds each message and compares it against a configurable baseline using **Cosine similarity**, **Euclidean distance**, and scalar features like **punctuation density**, **entropy**, and more. The result is a continuous record of how your model’s and users’ behavior changes over time.
+TKYO Drift embeds each message and compares it against a configurable baseline using **Cosine similarity**, **Euclidean distance**, and scalar features like **punctuation density**, **entropy**, and more. The result is a continuous record of how your model's and users' behavior changes over time.
 
 Use it to answer questions like:
 
@@ -326,7 +326,8 @@ ID, TIMESTAMP, I/O TYPE, SEMANTIC ROLLING EUC, SEMANTIC TRAINING EUC, CONCEPT RO
 
 - Cosine similarities and euclidean distances are recorded per model and baseline type.
 - Additional metadata like ioType, date and UUIDs are included for tracking.
-- Neither the log, nor the binary files, contain your users input or AI outputs. This data is not necessary to calculate drift, and its exclusion is an intentional choice for data privacy.
+- Text inputs are logged in a separate `text_log.csv` file for debugging and analysis purposes. This is separate from the drift calculation logs and binary files.
+- The binary files contain only the embeddings and do not store the original text inputs or AI outputs.
 
 Note: if you add or remove model types to the tkyoDrift tracker, the log will break. Please ensure you clear any existing logs after altering the embedding model names. What we mean here, is that if you change your conceptual embedding model from "concept" to "vibes", when writing to the log the makeLogEntry method of the Drift Class would work, but the log parser would fail.
 
@@ -505,7 +506,7 @@ The result is a value between -1 and 1. For normalized embedding vectors (as use
 - `1.0` → Identical direction (no drift)
 - `0.0` → Orthogonal (maximum drift)
 
-Normalization ensures magnitude doesn’t influence the result, so only the _direction_ of the vector matters. Additionally, we are calculating the Euclidean Distance. This metric is not scale-invariant and is typically larger in magnitude. It’s useful in conjunction with cosine similarity to detect both directional and magnitude-based drift.
+Normalization ensures magnitude doesn't influence the result, so only the _direction_ of the vector matters. Additionally, we are calculating the Euclidean Distance. This metric is not scale-invariant and is typically larger in magnitude. It's useful in conjunction with cosine similarity to detect both directional and magnitude-based drift.
 
 ## How we get the Baseline (B)
 

@@ -1,9 +1,27 @@
+/**
+ * Utility function for loading scalar metrics from JSONL files.
+ * This function reads metric data from files, handles both model-specific and model-agnostic metrics,
+ * and supports hybrid mode for training data.
+ */
+
 import fs from 'fs';
 import readline from 'readline';
 import path from 'path';
 import { OUTPUT_DIR } from './oneOffEmb.js';
 
-// * Function to read scalar metrics from the scalar jsonl files and group them by metric name
+/**
+ * Loads scalar metrics from JSONL files and groups them by metric name.
+ * Supports both model-specific and model-agnostic metrics, and can operate in hybrid mode
+ * where training data is derived from rolling data.
+ * 
+ * @param {string[]} metricNames - Array of metric names to load
+ * @param {string} ioType - Type of input/output (e.g., 'input', 'output')
+ * @param {string} baselineType - Type of baseline ('training' or 'rolling')
+ * @param {string|null} modelType - Optional model type for model-specific metrics
+ * @param {boolean} hybridMode - If true, uses rolling data as training data
+ * @returns {Promise<Object>} Object containing arrays of metric values keyed by metric name
+ */
+
 export async function loadScalarMetrics(
   metricNames,
   ioType,

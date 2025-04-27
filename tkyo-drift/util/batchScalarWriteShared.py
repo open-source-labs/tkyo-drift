@@ -1,3 +1,9 @@
+"""
+Module for computing and writing shared scalar metrics for text data.
+This module calculates various text-based metrics like character length,
+entropy, word length, and punctuation density, then writes them to JSONL files.
+"""
+
 from datasets import Dataset, concatenate_datasets
 import os
 import json
@@ -9,6 +15,30 @@ from batchEmbWriter import resolve_io_column
 # * Writes shared scalar metrics (like character length, entropy, etc.) for training data
 # * One file is created per metric (e.g., ioTypeName.characterLength.training.scalar.jsonl)
 def write_shared_scalar_metrics(data_path, io_type, io_type_name):
+    """
+    Compute and write shared scalar metrics for a dataset of texts.
+    
+    This function processes a dataset of texts and computes various scalar metrics
+    for each text, including:
+    - Character length
+    - Character entropy (measures repetition vs. diversity)
+    - Average word length
+    - Punctuation density
+    - Uppercase ratio
+    
+    The metrics are written to separate JSONL files, one per metric type,
+    in the format: ioType.metricName.training.scalar.jsonl
+    
+    Args:
+        data_path (str): Path to the dataset directory containing .arrow files
+        io_type (str): Type of input/output (e.g., 'input', 'output')
+        io_type_name (str): Name identifier for the I/O type
+        
+    Note:
+        The function includes progress tracking and estimated time remaining
+        for long-running operations.
+    """
+    
     # Load all `.arrow` files from the provided dataset directory
     arrow_files = [
         os.path.join(data_path, f)

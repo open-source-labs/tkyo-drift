@@ -1,3 +1,9 @@
+/**
+ * Utility function to interface with Python batch processing scripts.
+ * This module provides a bridge between Node.js and Python for batch processing
+ * of training data and embeddings.
+ */
+
 import { spawn } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -7,6 +13,18 @@ import fs from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 // Directory containing the file (tkyo-drift)
 const __dirname = path.dirname(__filename);
+
+/**
+ * Sets up and processes training data using Python batch processing scripts.
+ * This function spawns a Python process to handle batch embedding generation
+ * and training data setup.
+ * 
+ * @param {string} dataSetPath - Path to the dataset directory
+ * @param {string} ioType - Type of input/output (e.g., 'input', 'output')
+ * @param {string} ioTypeName - Name identifier for the I/O type
+ * @returns {Promise<string>} The output from the Python process
+ * @throws {Error} If the dataset path doesn't exist or if Python process fails
+ */
 
 export default async function tkyoDriftSetTraining(
   dataSetPath,
