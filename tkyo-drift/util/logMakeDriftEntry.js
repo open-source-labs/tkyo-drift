@@ -1,14 +1,27 @@
+/**
+ * Utility function to log drift metrics (cosine similarity or euclidean distance) to a CSV file.
+ * This function handles both the creation of new log files and appending to existing ones.
+ * The log file structure is dynamic based on the models and baseline types being used.
+ */
+
 import fs from 'fs';
 import path from 'path';
-import { OUTPUT_DIR } from './oneOffEmb.js';
+import { config } from '../config.js';
 
+/**
+ * Creates or appends a log entry for drift metrics to the appropriate CSV file.
+ * 
+ * @param {string} id - Unique identifier (UUID) for the drift analysis
+ * @param {Object} mathObject - Object containing drift metrics with keys in format "modelType.ioType.baselineType"
+ * @param {string} type - Type of drift metric, either 'COS' for cosine similarity or 'EUC' for euclidean distance
+ */
 export default function makeLogEntry(id, mathObject, type) {
   let logPath = '';
   // Construct the destination to the log in the data folder
   if (type === 'COS') {
-    logPath = path.join(OUTPUT_DIR, 'logs', 'COS_log.csv');
-  } else {
-    logPath = path.join(OUTPUT_DIR, 'logs', 'EUC_log.csv');
+    logPath = path.join(config.outputDir, 'logs', 'COS_log.csv');
+  } else if (type === 'EUC') {
+    logPath = path.join(config.outputDir, 'logs', 'EUC_log.csv');
   }
 
   // Create a timestamp

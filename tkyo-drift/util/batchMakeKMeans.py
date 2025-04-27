@@ -1,3 +1,9 @@
+"""
+Module for performing K-means clustering on embedding vectors.
+This module provides functionality to cluster embedding vectors into groups
+using the K-means algorithm, with automatic determination of optimal cluster count.
+"""
+
 # Prevent _pycache_ creation, since these scripts only run on demand
 import sys
 sys.dont_write_bytecode = True
@@ -9,6 +15,24 @@ from sklearn.cluster import KMeans
 import time
 
 def kMeansClustering(embeddings):
+    """
+    Perform K-means clustering on a set of embedding vectors.
+    
+    This function automatically determines the optimal number of clusters
+    based on the number of vectors, then performs K-means clustering to
+    identify centroids that represent the main patterns in the data.
+    
+    Args:
+        embeddings (numpy.ndarray): Array of embedding vectors to cluster
+        
+    Returns:
+        numpy.ndarray: Array of cluster centroids
+        
+    Note:
+        The number of clusters is determined by the formula: sqrt(n/2) * 10,
+        where n is the number of vectors. This is a heuristic that balances
+        the granularity of clustering with computational efficiency.
+    """
 
     # Starts the total function timer
     startTotal = time.perf_counter()

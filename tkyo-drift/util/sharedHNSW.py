@@ -1,3 +1,9 @@
+"""
+Module for performing nearest neighbor search using HNSW (Hierarchical Navigable Small World) algorithm.
+This module provides functionality to find similar vectors in a dataset using approximate nearest neighbor search,
+with special handling for both training and rolling baselines.
+"""
+
 # Numerical operations package
 import numpy as np
 # HNSW nearest neighbor search package
@@ -16,6 +22,28 @@ import sys
 import traceback
 
 def HNSW(io_type, model_type, query, baseline_type, file_path):
+    """
+    Perform nearest neighbor search using HNSW algorithm.
+    
+    This function loads embeddings from a binary file and finds the k nearest neighbors
+    to the query vector. It handles both training and rolling baselines differently,
+    with special considerations for small datasets and KMeans centroids.
+    
+    Args:
+        io_type (str): Type of input/output (e.g., 'input', 'output')
+        model_type (str): Type of model (e.g., 'mini', 'e5')
+        query (str): JSON string containing the query vector
+        baseline_type (str): Type of baseline ('training' or 'rolling')
+        file_path (str): Path to the binary file containing embeddings
+        
+    Returns:
+        dict: A dictionary containing:
+            - centroids: List of nearest neighbor vectors
+            - distances: List of distances to nearest neighbors (None for small datasets)
+            
+    Raises:
+        ValueError: If query format is invalid or data size mismatch
+    """
 
     # Parse the JSON query string into a numpy array
     try:
@@ -24,6 +52,26 @@ def HNSW(io_type, model_type, query, baseline_type, file_path):
         raise ValueError("Invalid query format - must be JSON string")
 
     def load_embeddings(filename):
+        """
+        Load embeddings from a binary file with header information.
+        
+        The binary file format is:
+        - First 8 bytes: Header containing num_vectors (4 bytes) and dims (4 bytes)
+        - Remaining bytes: Float32 array of embeddings
+        
+        Args:
+            filename (str): Path to the binary file
+            
+        Returns:
+            tuple: (reshaped_data, num_vectors, dims)
+                - reshaped_data: numpy array of shape (num_vectors, dims)
+                - num_vectors: Number of vectors in the file
+                - dims: Dimension of each vector
+                
+        Raises:
+            ValueError: If data size doesn't match header information
+        """
+        
         # Loads the embeddings from the binary file with the header
         with open(filename, "rb") as f:
             # Read and parse header containing num_vector and dims

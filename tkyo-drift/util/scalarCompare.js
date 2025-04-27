@@ -1,4 +1,18 @@
-// * Function that compares the scalar distributions between rolling and training
+/**
+ * Utility functions for comparing statistical distributions between training and rolling data.
+ * These functions calculate means, standard deviations, and Population Stability Index (PSI)
+ * to detect drift in scalar metrics.
+ */
+
+/**
+ * Compares statistical distributions between training and rolling data sets.
+ * For each shared metric, calculates means, standard deviations, and PSI.
+ * 
+ * @param {Object} trainingMetrics - Object containing arrays of training data for each metric
+ * @param {Object} rollingMetrics - Object containing arrays of rolling data for each metric
+ * @returns {Object} Object containing statistical comparisons for each shared metric
+ */
+
 export function compareScalarDistributions(trainingMetrics, rollingMetrics) {
   const result = {};
 
@@ -37,18 +51,40 @@ export function compareScalarDistributions(trainingMetrics, rollingMetrics) {
   return result;
 }
 
-// Helper: Mean
+/**
+ * Calculates the arithmetic mean of an array of numbers.
+ * 
+ * @param {number[]} arr - Array of numbers
+ * @returns {number} The mean value
+ */
+
 function mean(arr) {
   return arr.reduce((sum, val) => sum + val, 0) / arr.length;
 }
 
-// Helper: Standard Deviation
+/**
+ * Calculates the standard deviation of an array of numbers.
+ * 
+ * @param {number[]} arr - Array of numbers
+ * @returns {number} The standard deviation
+ */
+
 function stddev(arr) {
   const avg = mean(arr);
   const variance =
     arr.reduce((sum, val) => sum + (val - avg) ** 2, 0) / arr.length;
   return Math.sqrt(variance);
 }
+
+/**
+ * Calculates the Population Stability Index (PSI) between two distributions.
+ * PSI measures the difference between two probability distributions.
+ * 
+ * @param {number[]} train - Array of training data values
+ * @param {number[]} roll - Array of rolling data values
+ * @param {number} bins - Number of bins to use for distribution comparison (default: 10)
+ * @returns {number|null} The PSI value, or null if input is invalid
+ */
 
 function calculatePSI(train, roll, bins = 10) {
   if (

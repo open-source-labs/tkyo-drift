@@ -1,9 +1,15 @@
+"""
+Module for batch processing of text embeddings using transformer models.
+This module handles the generation of embeddings for both short and long texts,
+with special handling for texts that exceed the model's maximum token length.
+"""
+
 # Prevent _pycache_ creation, since these scripts only run on demand
 import sys
 sys.dont_write_bytecode = True
 
 # Import helper function to create kmeans of data
-import pythonKMeans
+import batchMakeKMeans
 
 # This is good for vectors/matrices
 import numpy as np
@@ -23,6 +29,23 @@ import os
 import gc
 
 def trainingEmb(model_type, model_name, data_path, io_type, io_type_name):
+    """
+    Generate embeddings for a dataset using a specified transformer model.
+    
+    This function processes a dataset in batches, handling both short and long texts.
+    For long texts, it uses a chunking strategy to process them in smaller pieces.
+    It also computes and saves model-specific scalar metrics for each embedding.
+    
+    Args:
+        model_type (str): Type of model (e.g., 'mini', 'e5')
+        model_name (str): Name of the transformer model to use
+        data_path (str): Path to the dataset directory
+        io_type (str): Type of input/output (e.g., 'input', 'output')
+        io_type_name (str): Name identifier for the I/O type
+        
+    Raises:
+        ValueError: If no .arrow files are found in the dataset directory
+    """
 
     # Starts the total function timer
     startTotal = time.perf_counter()
@@ -62,6 +85,16 @@ def trainingEmb(model_type, model_name, data_path, io_type, io_type_name):
 
     # When invoked, this will embed the current batch
     def embed_data(data):
+        """
+        Embed a batch of texts, handling both short and long texts appropriately.
+        
+        Args:
+            data (list): List of text strings to embed
+            
+        Returns:
+            numpy.ndarray: Array of embeddings in the same order as input texts
+        """
+        
         # Stores texts shorter than 512 tokens
         short_texts = []
         # Stores short text positions in the batch
@@ -121,6 +154,16 @@ def trainingEmb(model_type, model_name, data_path, io_type, io_type_name):
     
     # Handles the embeddings of a single long text
     def embed_long_text(text):
+        """
+        Embed a single long text by chunking and averaging chunk embeddings.
+        
+        Args:
+            text (str): The text to embed
+            
+        Returns:
+            numpy.ndarray: The averaged embedding vector
+        """
+        
         chunks = chunk_text(text, tokenizer)
         tokenized = tokenizer(
             chunks,
@@ -136,6 +179,19 @@ def trainingEmb(model_type, model_name, data_path, io_type, io_type_name):
     
     # Breaks the text up into overlapping chunks
     def chunk_text(text, tokenizer, max_length=512, stride=256):
+        """
+        Break a long text into overlapping chunks for processing.
+        
+        Args:
+            text (str): The text to chunk
+            tokenizer: The tokenizer to use
+            max_length (int): Maximum length of each chunk
+            stride (int): Number of tokens to overlap between chunks
+            
+        Returns:
+            list: List of text chunks
+        """
+        
         # Tokenizes each input
         tokens = tokenizer.encode(text, add_special_tokens=False)
         # Holds the tokenized chunks
@@ -150,7 +206,7 @@ def trainingEmb(model_type, model_name, data_path, io_type, io_type_name):
         return chunks
 
     # Embed Data
-    print(f"Embedding {io_type}s using {model_name} for {model_type} knowledge...")
+    print(f"Embedding {io_type}s using {model_name}")
     # Initialize an empty list to store all input embeddings
     embeddings = []
     # Set the number of examples to process at once (smaller = less memory, larger = faster)
@@ -250,7 +306,7 @@ def trainingEmb(model_type, model_name, data_path, io_type, io_type_name):
             embeddings.astype(np.float32).tofile(f)
     else:
         print(f"You have >=  100000 {io_type} embeddings: Performing K Means analysis to filter embeddings.")
-        kMeansEmbedding = pythonKMeans.kMeansClustering(embeddings)
+        kMeansEmbedding = batchMakeKMeans.kMeansClustering(embeddings)
 
         # Assign the number of vectors for the training data
         num_vectors = kMeansEmbedding.shape[0]
@@ -292,6 +348,17 @@ def trainingEmb(model_type, model_name, data_path, io_type, io_type_name):
     return
 
 def resolve_io_column(batch, io_type_name):
+    """
+    Resolve the correct column name for I/O data in the batch.
+    
+    Args:
+        batch: The dataset batch
+        io_type_name (str): Name identifier for the I/O type
+        
+    Returns:
+        list: List of texts from the correct column
+    """
+    
     try:
         # -------------------------------
         # Case 1: Flat column access
@@ -329,7 +396,7 @@ def resolve_io_column(batch, io_type_name):
                     if val is not None:
                         result.append(val)
                 except (KeyError, IndexError, TypeError):
-                    # If something goes wrong (e.g., path doesn’t exist, value is None), skip it
+                    # If something goes wrong (e.g., path doesn't exist, value is None), skip it
                     print(f"[WARN] Skipping row {i}: missing nested path in {io_type_name}")
             return result
 

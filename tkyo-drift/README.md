@@ -24,7 +24,7 @@ In production, even minor changes to prompts, model weights, or input phrasing c
 
 And it’s not just the model: user language evolves too. New slang, trending phrases, or tone shifts may emerge that your model wasn't trained on and without observability, you'll miss them.
 
-TKYO Drift embeds each message and compares it against a configurable baseline using **Cosine similarity**, **Euclidean distance**, and scalar features like **punctuation density**, **entropy**, and more. The result is a continuous record of how your model’s and users’ behavior changes over time.
+TKYO Drift embeds each message and compares it against a configurable baseline using **Cosine similarity**, **Euclidean distance**, and scalar features like **punctuation density**, **entropy**, and more. The result is a continuous record of how your model's and users' behavior changes over time.
 
 Use it to answer questions like:
 
@@ -114,9 +114,13 @@ tkyoDrift(userSubmission, 'input')
 
 5. Enjoy the benefits of having drift detection:
 
+```bash
+npx tkyo cos
+npx tkyo scalar
+🏎️☁️☁️☁️ ← THAT GUY IS DRIFTING
 ```
-🏎️☁️☁️☁️ <- THAT GUY IS DRIFTING
-```
+
+This library will create a tkyoData folder at the project root! Don't forget to add it to your `.gitIgnore` as it may contain large files depending on your throughput. All logs, scalars, and binary files tkyoDrift needs to operate will be placed there.
 
 # How do you use this thing?
 
@@ -131,6 +135,22 @@ You can interact with this library in a couple ways;
 * We recommend that you do this from a strong PC, and then transfer your data into the appropriate folders. Due to a number of factors (amount of data, length of individual records, lack of CUDA access, lack of memory, lack of cpu cores, count of embedding models) this process can take an exceptionally long time to complete depending on the size of your training data.
 
 There is also a small training file downloader script in the util folder called downloadTrainingData.py that you can run to grab the training data from hugging face if you happen to be using a model for your workflow from there.
+
+## Configuration via Environment Variables
+
+TKYO Drift supports configuration via environment variables for deployment flexibility. You can set the following variables:
+
+- `TEXT_LOGGING`: Set to `false` to disable logging of input text. Default is `true`.
+- `OUTPUT_DIR`: Set the output directory for all drift data. Default is `./tkyoData`.
+
+Example usage (in your shell or `.env` file):
+
+```bash
+export TEXT_LOGGING=false
+export OUTPUT_DIR=/custom/path/for/tkyoData
+```
+
+If not set, the defaults in `util/config.js` will be used.
 
 ## One-off Ingestion
 
@@ -304,7 +324,7 @@ Again, the second argument is the key for the object you would like to embed and
 
 ## Logging
 
-Results are stored in two CSV files (`COS_log.csv` & `EUC_log.csv`) with dynamic headers. Each one-off run appends one row to each file. Keep in mind that training data is not added to the log, as the assumption is that your training baseline is what we compare against to measure drift.
+Results are stored in three CSV files (`COS_log.csv`, `EUC_log.csv` & `text_log.csv`) with dynamic headers. Each one-off run appends one row to each file. Keep in mind that training data is not added to the log, as the assumption is that your training baseline is what we compare against to measure drift.
 
 ### Format
 
@@ -320,9 +340,16 @@ For the euclidean distance log:
 ID, TIMESTAMP, I/O TYPE, SEMANTIC ROLLING EUC, SEMANTIC TRAINING EUC, CONCEPT ROLLING EUC...
 ```
 
+For the text input log:
+
+```
+ID, TEXT
+```
+
 - Cosine similarities and euclidean distances are recorded per model and baseline type.
 - Additional metadata like ioType, date and UUIDs are included for tracking.
-- Neither the log, nor the binary files, contain your users input or AI outputs. This data is not necessary to calculate drift, and its exclusion is an intentional choice for data privacy.
+- Text inputs are logged in a separate `text_log.csv` file for debugging and analysis purposes. This is separate from the drift calculation logs and binary files.
+- The binary files contain only the embeddings and do not store the original text inputs or AI outputs.
 
 Note: if you add or remove model types to the tkyoDrift tracker, the log will break. Please ensure you clear any existing logs after altering the embedding model names. What we mean here, is that if you change your conceptual embedding model from "concept" to "vibes", when writing to the log the makeLogEntry method of the Drift Class would work, but the log parser would fail.
 
@@ -501,7 +528,7 @@ The result is a value between -1 and 1. For normalized embedding vectors (as use
 - `1.0` → Identical direction (no drift)
 - `0.0` → Orthogonal (maximum drift)
 
-Normalization ensures magnitude doesn’t influence the result, so only the _direction_ of the vector matters. Additionally, we are calculating the Euclidean Distance. This metric is not scale-invariant and is typically larger in magnitude. It’s useful in conjunction with cosine similarity to detect both directional and magnitude-based drift.
+Normalization ensures magnitude doesn't influence the result, so only the _direction_ of the vector matters. Additionally, we are calculating the Euclidean Distance. This metric is not scale-invariant and is typically larger in magnitude. It's useful in conjunction with cosine similarity to detect both directional and magnitude-based drift.
 
 ## How we get the Baseline (B)
 

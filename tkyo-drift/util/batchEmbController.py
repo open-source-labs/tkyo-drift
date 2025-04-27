@@ -1,9 +1,15 @@
+"""
+Controller module for batch processing of embeddings and scalar metrics.
+This module coordinates the generation of embeddings and scalar metrics
+for training data sets.
+"""
+
 # Prevent _pycache_ creation, since these scripts only run on demand
 import sys
 sys.dont_write_bytecode = True
 # Import helper function to load and embed the data
-import pythonTrainingEmb
-from writeSharedScalars import write_shared_scalar_metrics
+import batchEmbWriter
+from batchScalarWriteShared import write_shared_scalar_metrics
 
 
 # Allows the use of time functions
@@ -14,6 +20,24 @@ import json
 import traceback
 
 def tkyoDriftSetTraining(data_set_Path, io_type, io_type_name):
+    """
+    Process a dataset to generate embeddings and scalar metrics for training.
+    
+    This function coordinates the generation of embeddings for multiple models
+    and computes scalar metrics for the given dataset. It handles both the
+    embedding generation and scalar metric computation in a single pass.
+    
+    Args:
+        data_set_Path (str): Path to the dataset directory
+        io_type (str): Type of input/output (e.g., 'input', 'output')
+        io_type_name (str): Name identifier for the I/O type
+        
+    Returns:
+        dict: A dictionary containing the status and message of the operation
+        
+    Raises:
+        Exception: If any error occurs during processing
+    """
 
     # Starts the total function timer
     startTotal = time.perf_counter()
@@ -30,7 +54,7 @@ def tkyoDriftSetTraining(data_set_Path, io_type, io_type_name):
 
     # Iterate through models dictionary
     for model_type, model_name in MODELS.items():
-        pythonTrainingEmb.trainingEmb(
+        batchEmbWriter.trainingEmb(
             model_type=model_type,
             model_name=model_name,
             data_path=data_set_Path,

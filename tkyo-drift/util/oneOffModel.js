@@ -1,13 +1,33 @@
+/**
+ * Core class for handling drift analysis using a single model.
+ * This class manages the lifecycle of a drift analysis model, including
+ * model loading, embedding generation, and drift metric computation.
+ */
+
 import fs from 'fs';
 import path from 'path';
 import { error } from 'console';
-import fsPromises from 'fs/promises';
-import { spawn } from 'child_process';
-import { pipeline } from '@xenova/transformers';
-import { OUTPUT_DIR, MODEL_CACHE } from './oneOffEmb.js';
 import { fileURLToPath } from 'url';
+import fsPromises from 'fs/promises';
+import { config } from '../config.js';
+import { spawn } from 'child_process';
+import { MODEL_CACHE } from './oneOffEmb.js';
+import { pipeline } from '@xenova/transformers';
 
+/**
+ * Class representing a drift analysis model.
+ * Handles model initialization, embedding generation, and drift metric computation.
+ */
 export class DriftModel {
+  /**
+   * Create a new DriftModel instance.
+   * 
+   * @param {string} modelType - Type of model (e.g., 'mini', 'e5')
+   * @param {string} modelName - Name of the transformer model to use
+   * @param {string} ioType - Type of input/output (e.g., 'input', 'output')
+   * @param {string} baselineType - Type of baseline ('training' or 'rolling')
+   */
+  
   constructor(modelType, modelName, ioType, baselineType) {
     this.baselineType = baselineType;
     this.modelType = modelType;
@@ -25,7 +45,13 @@ export class DriftModel {
     this.embeddingFilePath = null;
   }
 
-  // * Function to set the file path
+  /**
+   * Set the file paths for embeddings and scalar metrics.
+   * Handles both regular and KMeans-based training files.
+   * 
+   * @throws {Error} If there's an error setting the file paths
+   */
+  
   setFilePaths() {
     try {
       // ?NOTE: training baselines may use KMeans files, which are handled inside the Python logic.
@@ -35,14 +61,14 @@ export class DriftModel {
       const baseName = `${this.modelType}.${this.ioType}.${this.baselineType}`;
 
       // Assemble the embedding file path (.bin file)
-      const vectorPath = path.join(OUTPUT_DIR, 'vectors', `${baseName}.bin`);
+      const vectorPath = path.join(config.outputDir, 'vectors', `${baseName}.bin`);
       const vectorKmeansPath = path.join(
-        OUTPUT_DIR,
+        config.outputDir,
         'vectors',
         `${baseName}.kmeans.bin`
       );
       const fallbackPath = path.join(
-        OUTPUT_DIR,
+        config.outputDir,
         'vectors',
         `${this.modelType}.${this.ioType}.rolling.bin`
       );
@@ -57,7 +83,7 @@ export class DriftModel {
 
       // Scalar metric path (.scalar.jsonl)
       this.scalarFilePath = path.join(
-        OUTPUT_DIR,
+        config.outputDir,
         'scalars',
         `${baseName}.scalar.jsonl`
       );
@@ -68,7 +94,13 @@ export class DriftModel {
     }
   }
 
-  // * Function to load the embedding model
+  /**
+   * Load the embedding model using the Xenova transformer pipeline.
+   * Uses a global cache to avoid reloading the same model.
+   * 
+   * @throws {Error} If there's an error loading the model
+   */
+  
   async loadModel() {
     try {
       // Don't reload a model if it's loaded.
@@ -93,7 +125,14 @@ export class DriftModel {
     }
   }
 
-  // * Function to make an embedding from an input/output pair
+  /**
+   * Generate an embedding for the given text.
+   * Handles both short and long texts using chunking for texts that exceed token limits.
+   * 
+   * @param {string} text - The text to generate an embedding for
+   * @throws {Error} If the text is invalid or embedding generation fails
+   */
+  
   async makeEmbedding(text) {
     try {
       // Validate that the text is not null/undefined/empty
@@ -184,7 +223,13 @@ export class DriftModel {
     }
   }
 
-  // * Function to Save Data to file path
+  /**
+   * Save the current embedding to a binary file.
+   * Only saves for rolling baselines, not training baselines.
+   * 
+   * @throws {Error} If there's an error saving the embedding
+   */
+  
   async saveToBin() {
     // Skip if training — this method is only for rolling baseline
     if (this.baselineType === 'training') return;
@@ -273,7 +318,13 @@ export class DriftModel {
     }
   }
 
-  // * Function to read the contents of the Bins, Build an HNSW
+  /**
+   * Read embeddings from the binary file.
+   * Handles both regular and KMeans-based training files.
+   * 
+   * @throws {Error} If there's an error reading the file
+   */
+  
   async readFromBin() {
     // Full path to DriftModel.js
     const __filename = fileURLToPath(import.meta.url);
@@ -294,7 +345,7 @@ export class DriftModel {
       );
     }
     // Ensures we are running pythonHNSW.py correctly
-    const scriptPath = path.join(__dirname, 'pythonHNSW.py');
+    const scriptPath = path.join(__dirname, 'sharedHNSW.py');
 
     try {
       return new Promise((resolve, reject) => {
@@ -357,7 +408,13 @@ export class DriftModel {
     }
   }
 
-  // * Function to get baseline value from vectorArray
+  /**
+   * Calculate the baseline embedding from the loaded vector array.
+   * Computes the mean of all vectors in the array.
+   * 
+   * @throws {Error} If the vector array is not loaded or empty
+   */
+  
   getBaseline() {
     try {
       // Check to make sure the vectorArray was correctly set in readFromBin
@@ -407,7 +464,13 @@ export class DriftModel {
     }
   }
 
-  // * Function to get cosine similarity between baseline and embedding
+  /**
+   * Calculate the cosine similarity between the current embedding and baseline.
+   * 
+   * @returns {number} The cosine similarity score
+   * @throws {Error} If embeddings are not available
+   */
+  
   getCosineSimilarity() {
     try {
       // Validate the embedding and baselines both exist
@@ -448,7 +511,13 @@ export class DriftModel {
     }
   }
 
-  // * Function to calculate the euclidean distance from the baseline
+  /**
+   * Calculate the euclidean distance between the current embedding and baseline.
+   * 
+   * @returns {number} The euclidean distance
+   * @throws {Error} If embeddings are not available
+   */
+  
   getEuclideanDistance() {
     try {
       // Validate that the embedding and baselines exist
@@ -485,7 +554,12 @@ export class DriftModel {
     }
   }
 
-  // * Function to siphon PSI distribution metrics
+  /**
+   * Capture model-specific scalar metrics for the current text.
+   * 
+   * @param {string} text - The text to analyze
+   */
+  
   captureModelSpecificScalarMetrics(text) {
     try {
       // Skip if training — this method is only for rolling baseline
@@ -508,7 +582,12 @@ export class DriftModel {
     }
   }
 
-  // * Function to write model-specific scalar metrics to separate files
+  /**
+   * Save the captured scalar metrics to a JSONL file.
+   * 
+   * @throws {Error} If there's an error saving the metrics
+   */
+  
   async saveScalarMetrics() {
     // Skip if training — this method is only for rolling baseline
     if (this.baselineType === 'training') return;
@@ -527,7 +606,7 @@ export class DriftModel {
           // Construct the file path using: ioType.metric.modelType.baselineType.scalar.jsonl
           // Example: input.norm.semantic.rolling.scalar.jsonl
           const filePath = path.join(
-            OUTPUT_DIR,
+            config.outputDir,
             'scalars',
             `${this.ioType}.${metric}.${this.modelType}.rolling.scalar.jsonl`
           );

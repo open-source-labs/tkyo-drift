@@ -1,25 +1,51 @@
+/**
+ * Core module for drift analysis using transformer-based embeddings.
+ * This module provides the main pipeline for analyzing text drift using
+ * multiple models and metrics, including cosine similarity and euclidean distance.
+ */
+
 import fs from 'fs';
 import path from 'path';
 import { v4 } from 'uuid';
-import { DriftModel } from './DriftModel.js';
-import makeLogEntry from './makeLogEntry.js';
-import makeErrorLogEntry from './makeErrorLogEntry.js';
-import captureSharedScalarMetrics from './captureSharedScalarMetrics.js';
+import { config } from '../config.js';
+import { DriftModel } from './oneOffModel.js';
+import makeErrorLogEntry from './logMakeErrorEntry.js';
+import logMakeDriftEntry from './logMakeDriftEntry.js';
+import logMakeInputEntry from './logMakeInputEntry.js';
+import captureSharedScalarMetrics from './scalarCaptureShared.js';
 
-// * Global Variables for the utilities
-//  Embedding Models
-export const MODELS = {
-  // t5: 'Xenova/sentence-t5-large',
-  // bert: 'Xenova/sentence_bert', 
-  mini: 'Xenova/all-MiniLM-L12-v2',
-  e5: 'Xenova/e5-base-v2', 
-};
-// Log, Scalar, and Vector root output directory
-export const OUTPUT_DIR = path.resolve('./tkyoData');
-// Cache of pipeline output results, to speed up model loading
+/**
+ * Cache for pipeline output results to speed up model loading.
+ * This is used to prevent reloading models on each request in warm environments.
+ * @type {Object}
+ */
+
 export const MODEL_CACHE = {};
 
-// * One Off Ingestion Pipeline Logic
+/**
+ * Main function for performing drift analysis on a text input.
+ * 
+ * This function orchestrates the entire drift analysis pipeline:
+ * 1. Sets up necessary directories and validates model configuration
+ * 2. Initializes and loads transformer models
+ * 3. Generates embeddings for the input text
+ * 4. Computes scalar metrics (both shared and model-specific)
+ * 5. Saves embeddings and metrics to disk
+ * 6. Calculates drift metrics (cosine similarity and euclidean distance)
+ * 7. Logs all results
+ * 
+ * @param {string} text - The text to analyze for drift
+ * @param {string} ioType - Type of input/output (e.g., 'input', 'output')
+ * @returns {Promise<void>}
+ * 
+ * @throws {Error} If model configuration is invalid
+ * @throws {Error} If there are issues with model construction or loading
+ * 
+ * @example
+ * Analyze drift in an input text
+ * await tkyoDrift("Sample text to analyze", "input");
+ */
+
 export default async function tkyoDrift(text, ioType) {
   // Stopwatch START 🏎️
   // console.time('Drift Analyzer Full Run');
@@ -34,20 +60,20 @@ export default async function tkyoDrift(text, ioType) {
   try {
     //  ------------- << Make Directories >> -------------
     // Check if directory exists, if not, make it.
-    if (!fs.existsSync(OUTPUT_DIR)) {
-      fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+    if (!fs.existsSync(config.outputDir)) {
+      fs.mkdirSync(config.outputDir, { recursive: true });
     }
 
     // Create subdirectories for vectors, scalars, and logs
     for (const dir of subdirectories) {
-      const subdirPath = path.join(OUTPUT_DIR, dir);
+      const subdirPath = path.join(config.outputDir, dir);
       if (!fs.existsSync(subdirPath)) {
         fs.mkdirSync(subdirPath, { recursive: true });
       }
     }
 
     // Validate model config (we need the / and it's gotta be a string)
-    for (const [type, name] of Object.entries(MODELS)) {
+    for (const [type, name] of Object.entries(config.models)) {
       if (typeof name !== 'string' || !name.includes('/')) {
         throw new Error(
           `Invalid or missing model ID for "${type}" model: "${name}"`
@@ -58,7 +84,7 @@ export default async function tkyoDrift(text, ioType) {
     //  ------------- << Construct Model Combinations >> -------------
     try {
       // * For each model, for each baselineType, make a model and assign to driftModels object
-      for (const [modelType, modelName] of Object.entries(MODELS)) {
+      for (const [modelType, modelName] of Object.entries(config.models)) {
         for (const baselineType of baselineTypes) {
           const key = `${modelType}.${ioType}.${baselineType}`;
           driftModels[key] = new DriftModel(
@@ -159,9 +185,14 @@ export default async function tkyoDrift(text, ioType) {
     // * Push the results to each log
     // Make shared ID and date for the cosine and Euclidean logs
     const sharedID = v4();
-    makeLogEntry(sharedID, similarityResults, 'COS');
-    makeLogEntry(sharedID, distanceResults, 'EUC');
+    logMakeDriftEntry(sharedID, similarityResults, 'COS');
+    logMakeDriftEntry(sharedID, distanceResults, 'EUC');
 
+    // Log the input text if logging is enabled
+    if (config.enableTextLogging) {
+      logMakeInputEntry(sharedID, text);
+    }
+    
     //  ------------- << END try/catch Error Handling >> -------------
     // * Push any errors to the error log
     // ! NOTE: This platform intentionally fails silently
