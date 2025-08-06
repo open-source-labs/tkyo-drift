@@ -42,9 +42,9 @@
 @@@@@@@@@@@@@@@@@%+:--::=****=:..::-. ......       ...:::::..........................                                                                                                                           .        
 @%%%####******+++++++++=============------:::::.............                                                   ...............................::::::::::::::::::::::------=====+++++++*******#######%%%%%%@@@@@@@        
 @@@@@@@@@@@@@@@@@@%%%##############%%%%%%%%%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
-import tkyoDriftSetTrainingHook from './util/tkyoDriftSetTrainingHook.js';
-import printScalarCLI from './util/printScalarCLI.js';
-import printLogCLI from './util/printLogCLI.js';
+import tkyoDriftSetTrainingHook from './util/batchPythonHook.js';
+import printScalarCLI from './util/logPrintScalarCLI.js';
+import printLogCLI from './util/logPrintCosCLI.js';
 import tkyoDrift from './util/oneOffEmb.js';
 import chalk from 'chalk';
 import path from 'path';
@@ -106,14 +106,14 @@ if (process.argv[1].endsWith('tkyo')) {
     default:
       console.log(
         chalk.gray(`
-↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓    ↑↑↑     ↗↓↓↓↗     ↓↓↓         ↓↓↓    ↓↓↓↓↓↓↓↓↓↓↓↓↖
-       ↑↑↑          ↑↑↑    ↗↑↑↑       ↑↑↑         ↑↑↑   ↑↑↑↑         ↖↑↑
-      ↑↑↑          ↑↑↑   ↗↑↑↑        ↑↑↑         ↑↑↑   ↑↑↑           ↖↑↑
-     ↑↑↑          ↑↑↑↑↑↑↑↘          ↑↑↑        ↑↑↑↑   ↑↑↑            ↖↑↑
-    ↖↑↑         →↑↑    ↑↑↑↘         ↑↑↑↑↑↑↑↑↑↑↑↑↑    ←↑↑            ↑↑↑↗
-    ↑↑↑         ↑↑↑     ↑↑↑↘             ↑↑↑         ↑↑↑           ↗↑↑↓
-   ↑↑↑         ↑↑↑       ↑↑↑↘           ↑↑↑          ↑↑↑↑        ↗↑↑↑
-  ↑↑↑         ↑↑↑         ↑↑↑↘         ↑↑↑            ↑↑↑↑↑↑↑↑↑↑↑↑↑↗
+↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓   ↗↑↑      ↗↓↓↓↗     ↓↓↓          ↓↓↓    ↓↓↓↓↓↓↓↓↓↓↓↓↖
+       ↗↑↑         ↗↑↑     ↗↑↑↑       ↗↑↑         ↗↑↑   ↗↑↑↑         ↖↑↑
+      ↗↑↑         ↗↑↑    ↗↑↑↑        ↗↑↑         ↗↑↑   ↗↑↑           ↖↑↑
+     ↗↑↑          ↑↑↑↑↑↑↑↘          ↗↑↑        ↗↑↑↑   ↗↑↑            ↖↑↑
+    ↖↑↑         →↑↑    ↑↑↑↘         ↑↑↑↑↑↑↑↑↑↑↑↑↑     ←↑↑            ↗↑↑↓
+   ↗↑↑         ↗↑↑     ↑↑↑↘             ↑↑↑          ↖↑↑           ↗↑↑↓
+  ↗↑↑         ↗↑↑       ↑↑↑↘           ↑↑↑           ↖↑↑↑        ↗↑↑↗
+ ↗↑↑         ↗↑↑         ↑↑↑↘         ↑↑↑             ↖↑↑↑↑↑↑↑↑↑↑↑↑↗
 
 Usage:
   ${chalk.yellowBright('tkyo')} ${chalk.white('cos')} ${chalk.blueBright(
@@ -126,7 +126,7 @@ Usage:
           '<path to data> <column name> <ioType>'
         )}  Embed dataset and update training baseline
 
-Readme docs in the node package or at ${chalk.blueBright(
+Readme docs are in the node package or at ${chalk.blueBright(
           'https://github.com/oslabs-beta/tkyo-drift'
         )}
       `)

@@ -3,7 +3,7 @@
   "version": "1.0.7",
   "description": "Lightweight CLI tool and library for detecting AI model drift using embeddings and scalar metrics. Tracks semantic, conceptual, and lexical change over time.",
   "main": "./tkyoDrift.js",
-  "bin":{
+  "bin": {
     "tkyo": "./tkyoDrift.js"
   },
   "types": "./tkyo.d.ts",
@@ -16,9 +16,6 @@
     "ai-monitoring",
     "embedding",
     "model-drift",
-    "semantic-drift",
-    "concept-drift",
-    "lexical-drift",
     "ai-evaluation",
     "machine-learning",
     "transformers",
